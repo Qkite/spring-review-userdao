@@ -5,38 +5,29 @@ import com.likelion.dao_project.connectionmaker.LocalConnectionMaker;
 import com.likelion.dao_project.domain.User;
 
 import java.sql.*;
-import java.util.Map;
 
 public class UserDao {
     ConnectionMaker connectionMaker;
 
     UserDao(ConnectionMaker connectionMaker){
-        this.connectionMaker =connectionMaker;
+        this.connectionMaker = connectionMaker;
     }
 
 
-    public void add(User user) throws SQLException {
+    public void jdbcContextWithStatementStrategy(StatementStrategy statementStrategy){
         Connection c = null;
         PreparedStatement pstmt = null;
-
-        if (user == null){
-            throw new RuntimeException();
-        }
 
         try {
             c = connectionMaker.getConnection();
 
-            // Query문 작성
-            pstmt = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?);");
-            pstmt.setString(1, user.getId());
-            pstmt.setString(2, user.getName());
-            pstmt.setString(3, user.getPassword());
+            pstmt = statementStrategy.makeStatement(c);
             pstmt.executeUpdate();
-
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
+        }
+        finally {
             if(pstmt!=null){
                 try {
                     pstmt.close();
@@ -44,7 +35,8 @@ public class UserDao {
 
                 }
             }
-            if (c!=null){
+
+            if(c!=null){
                 try {
                     c.close();
                 } catch (SQLException e) {
@@ -53,6 +45,47 @@ public class UserDao {
             }
 
         }
+
+    }
+
+
+
+    public void add(User user) throws SQLException {
+
+        jdbcContextWithStatementStrategy(new AddStatement(user));
+
+//        Connection c = null;
+//        PreparedStatement pstmt = null;
+//
+//        if (user == null){
+//            throw new RuntimeException();
+//        }
+//
+//        try {
+//            c = connectionMaker.getConnection();
+//            AddStatement addStatement = new AddStatement(user);
+//            pstmt = addStatement.makeStatement(c);
+//            pstmt.executeUpdate();
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            if(pstmt!=null){
+//                try {
+//                    pstmt.close();
+//                } catch (SQLException e) {
+//
+//                }
+//            }
+//            if (c!=null){
+//                try {
+//                    c.close();
+//                } catch (SQLException e) {
+//
+//                }
+//            }
+//
+//        }
     }
 
     public User findById(String id) throws SQLException {
@@ -65,11 +98,11 @@ public class UserDao {
             c = connectionMaker.getConnection();
 
 
-            // Query문 작성
+
             pstmt = c.prepareStatement("SELECT * FROM users WHERE id = ?");
             pstmt.setString(1, id);
 
-            // Query문 실행
+
             rs = pstmt.executeQuery();
             rs.next();
             try {
@@ -110,40 +143,40 @@ public class UserDao {
     }
 
     public void deleteAll() {
-        Connection c = null;
-        PreparedStatement pstmt = null;
 
-        try {
-             c = connectionMaker.getConnection();
-
-            // Query문 작성
-            pstmt = c.prepareStatement("delete from users");
-
-            // Query문 실행
-            pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        finally {
-            if(pstmt!=null){
-                try {
-                    pstmt.close();
-                } catch (SQLException e) {
-
-                }
-            }
-
-            if(c!=null){
-                try {
-                    c.close();
-                } catch (SQLException e) {
-
-                }
-            }
-
-
-        }
+        jdbcContextWithStatementStrategy(new DeleteStatement());
+//        Connection c = null;
+//        PreparedStatement pstmt = null;
+//
+//        try {
+//            c = connectionMaker.getConnection();
+//
+//            DeleteStatement deleteStatement = new DeleteStatement();
+//
+//            pstmt = deleteStatement.makeStatement(c);
+//            pstmt.executeUpdate();
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//        finally {
+//            if(pstmt!=null){
+//                try {
+//                    pstmt.close();
+//                } catch (SQLException e) {
+//
+//                }
+//            }
+//
+//            if(c!=null){
+//                try {
+//                    c.close();
+//                } catch (SQLException e) {
+//
+//                }
+//            }
+//
+//        }
     }
 
     public int getCount(){
