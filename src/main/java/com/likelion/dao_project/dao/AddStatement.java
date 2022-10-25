@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class AddStatement implements StatementStrategy{
+    // 이제 사용X
 
     User user;
     AddStatement(User user){

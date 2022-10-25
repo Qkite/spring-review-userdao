@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public class LocalConnectionMaker implements ConnectionMaker{
+    // 이제 사용X
     @Override
     public Connection getConnection() throws SQLException {
 
