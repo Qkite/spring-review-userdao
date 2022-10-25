@@ -1,17 +1,24 @@
 package com.likelion.dao_project.dao;
 
+import com.likelion.dao_project.connectionmaker.ConnectionMaker;
+import com.likelion.dao_project.connectionmaker.LocalConnectionMaker;
 import com.likelion.dao_project.domain.User;
 
 import java.sql.*;
 import java.util.Map;
 
 public class UserDao {
+    ConnectionMaker connectionMaker;
+
+    UserDao(ConnectionMaker connectionMaker){
+        this.connectionMaker =connectionMaker;
+    }
+
+
     public void add(User user) {
-        Map<String, String> env = System.getenv();
+
         try {
-            // DB접속 (ex sql workbeanch실행)
-            Connection c = DriverManager.getConnection(env.get("DB_HOST"),
-                    env.get("DB_USER"), env.get("DB_PASSWORD"));
+            Connection c = connectionMaker.getConnection();
 
             // Query문 작성
             PreparedStatement pstmt = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?);");
@@ -31,12 +38,10 @@ public class UserDao {
     }
 
     public User findById(String id) {
-        Map<String, String> env = System.getenv();
-        Connection c;
+
         try {
-            // DB접속 (ex sql workbeanch실행)
-            c = DriverManager.getConnection(env.get("DB_HOST"),
-                    env.get("DB_USER"), env.get("DB_PASSWORD"));
+            Connection c = connectionMaker.getConnection();
+
 
             // Query문 작성
             PreparedStatement pstmt = c.prepareStatement("SELECT * FROM users WHERE id = ?");
@@ -60,12 +65,9 @@ public class UserDao {
     }
 
     public void deleteAll() {
-        Map<String, String> env = System.getenv();
-        Connection c;
+
         try {
-            // DB접속 (ex sql workbeanch실행)
-            c = DriverManager.getConnection(env.get("DB_HOST"),
-                    env.get("DB_USER"), env.get("DB_PASSWORD"));
+            Connection c = connectionMaker.getConnection();
 
             // Query문 작성
             PreparedStatement pstmt = c.prepareStatement("delete from users");
@@ -79,12 +81,9 @@ public class UserDao {
     }
 
     public int getCount(){
-        Map<String, String> env = System.getenv();
-        Connection c;
+
         try {
-            // DB접속 (ex sql workbeanch실행)
-            c = DriverManager.getConnection(env.get("DB_HOST"),
-                    env.get("DB_USER"), env.get("DB_PASSWORD"));
+            Connection c = connectionMaker.getConnection();
 
             // Query문 작성
             PreparedStatement pstmt = c.prepareStatement("select count(*) from users");
@@ -105,8 +104,9 @@ public class UserDao {
         }
     }
 
-    public static void main(String[] args) {
-        UserDao userDao = new UserDao();
+    public static void main(String[] args) throws SQLException {
+        LocalConnectionMaker localConnectionMaker = new LocalConnectionMaker();
+        UserDao userDao = new UserDao(localConnectionMaker);
 //        userDao.add();
         User user = userDao.findById("6");
         System.out.println(user.getName());
