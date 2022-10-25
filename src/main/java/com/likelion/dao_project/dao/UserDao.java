@@ -15,93 +15,181 @@ public class UserDao {
     }
 
 
-    public void add(User user) {
+    public void add(User user) throws SQLException {
+        Connection c = null;
+        PreparedStatement pstmt = null;
+
+        if (user == null){
+            throw new RuntimeException();
+        }
 
         try {
-            Connection c = connectionMaker.getConnection();
+            c = connectionMaker.getConnection();
 
             // Query문 작성
-            PreparedStatement pstmt = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?);");
+            pstmt = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?);");
             pstmt.setString(1, user.getId());
             pstmt.setString(2, user.getName());
             pstmt.setString(3, user.getPassword());
-
-            // Query문 실행
             pstmt.executeUpdate();
 
-            pstmt.close();
-            c.close();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if(pstmt!=null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (c!=null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+
+                }
+            }
+
         }
     }
 
-    public User findById(String id) {
+    public User findById(String id) throws SQLException {
+        Connection c = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        User user = null;
 
         try {
-            Connection c = connectionMaker.getConnection();
+            c = connectionMaker.getConnection();
 
 
             // Query문 작성
-            PreparedStatement pstmt = c.prepareStatement("SELECT * FROM users WHERE id = ?");
+            pstmt = c.prepareStatement("SELECT * FROM users WHERE id = ?");
             pstmt.setString(1, id);
 
             // Query문 실행
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             rs.next();
-            User user = new User(rs.getString("id"), rs.getString("name"),
-                    rs.getString("password"));
-
-            rs.close();
-            pstmt.close();
-            c.close();
-
-            return user;
+            try {
+                user = new User(rs.getString("id"), rs.getString("name"),
+                        rs.getString("password"));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+
+            if(rs!=null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if(pstmt!=null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if(c!=null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+
+                }
+            }
+
         }
+        return user;
     }
 
     public void deleteAll() {
+        Connection c = null;
+        PreparedStatement pstmt = null;
 
         try {
-            Connection c = connectionMaker.getConnection();
+             c = connectionMaker.getConnection();
 
             // Query문 작성
-            PreparedStatement pstmt = c.prepareStatement("delete from users");
+            pstmt = c.prepareStatement("delete from users");
 
             // Query문 실행
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+        finally {
+            if(pstmt!=null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+
+                }
+            }
+
+            if(c!=null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+
+                }
+            }
+
+
         }
     }
 
     public int getCount(){
+        Connection c = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        int count;
 
         try {
-            Connection c = connectionMaker.getConnection();
+            c = connectionMaker.getConnection();
 
             // Query문 작성
-            PreparedStatement pstmt = c.prepareStatement("select count(*) from users");
+            pstmt = c.prepareStatement("select count(*) from users");
 
             // Query문 실행
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             rs.next();
-            int count  = rs.getInt(1);
-
-            rs.close();
-            pstmt.close();
-            c.close();
-
-            return count;
+            count  = rs.getInt(1);
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if(rs!=null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if(pstmt!=null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if(c!=null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+
+                }
+            }
+
         }
+        return count;
     }
 
     public static void main(String[] args) throws SQLException {

@@ -11,6 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,7 +40,7 @@ class UserDaoTest {
     }
 
     @Test
-    void addAndGet(){
+    void addAndGet() throws SQLException {
         userDao.add(user1);
         userDao.add(user2);
         assertEquals(userDao.getCount(), 2);
